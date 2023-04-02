@@ -8,6 +8,8 @@ import { fetchTasksTC } from '../tasks-reducer'
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { Button, IconButton } from '@mui/material'
 import { Delete } from '@mui/icons-material'
+import { useSelector } from 'react-redux'
+import { AppRootStateType } from '../../../app/store'
 
 type PropsType = {
     todolist: TodolistDomainType
@@ -25,13 +27,14 @@ type PropsType = {
 export const Todolist = React.memo(function ({demo = false, ...props}: PropsType) {
 
     const dispatch = useAppDispatch()
+    const todolists = useSelector<AppRootStateType>(state => state.todolists)
 
     useEffect(() => {
         if (demo) {
             return
         }
         const thunk = fetchTasksTC(props.todolist.id)
-        dispatch(thunk)
+        todolists && dispatch(thunk)
     }, [])
 
     const addTask = useCallback((title: string) => {

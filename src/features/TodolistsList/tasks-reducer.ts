@@ -1,4 +1,4 @@
-import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType, addTodolist, removeTodolist, setTodolists} from './todolists-reducer'
+import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistsActionType, addTodolist, clearData, removeTodolist, setTodolists} from './todolists-reducer'
 import {TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType} from '../../api/todolists-api'
 import {Dispatch} from 'redux'
 import {AppRootStateType, AppThunk} from '../../app/store'
@@ -54,15 +54,15 @@ const slice = createSlice({
         state[action.payload.task.todoListId].push(action.payload.task)
       },
       updateTask(state, action: PayloadAction<{taskId: string, model: UpdateDomainTaskModelType, todolistId: string}>) {
-        const tasks = state[action.payload.taskId]
-        const index = tasks.findIndex(task => task.id === action.payload.todolistId)
+        const tasks = state[action.payload.todolistId]
+        const index = tasks.findIndex(task => task.id === action.payload.taskId)
             if (index !== -1) tasks[index] = {...tasks[index], ...action.payload.model}
       },
       setTasks(state, action: PayloadAction<{tasks: Array<TaskType>, todolistId: string}>) {
         state[action.payload.todolistId] = action.payload.tasks 
     },
     },
-    extraReducers: {
+    /* extraReducers: {
         [setTodolists.type]: (state, action) => {
             return action.payload.todolists.forEach((tl: { id: string | number }) => {
                 state[tl.id] = []
@@ -75,26 +75,45 @@ const slice = createSlice({
         [addTodolist.type]: (state, action) => {
             state[action.payload.todolist.id] = []
         },
-    
+        [clearData.type]: (state) => {            
+            return state = {}
+        },
+      }, */
+      extraReducers: (builder) => {
+        builder
+          .addCase(setTodolists, (state, action) => {
+            // action is inferred correctly here if using TS
+            return action.payload.todolists.forEach((tl: { id: string | number }) => {
+                state[tl.id] = []
+            })
+          })
+          // You can chain calls, or have separate `builder.addCase()` lines each time
+          .addCase(removeTodolist, (state, action) => {
+            delete state[action.payload.id]
+            return state
+          })
+          // You can match a range of action types
+          .addCase(
+            addTodolist,
+            // `action` will be inferred as a RejectedAction due to isRejectedAction being defined as a type guard
+            (state, action) => {
+                state[action.payload.todolist.id] = []
+
+            }
+          )
+          .addCase(clearData, (state) => {
+            return state = {}
+          })
+          // and provide a default case if no other handlers matched
+          .addDefaultCase((state) => {
+            return state
+          })
       },
-    
   })
 
   export const tasksReducer = slice.reducer;
   const {removeTask, addTask, updateTask, setTasks} = slice.actions
 
-
-
-// actions
-/* export const removeTaskAC = (taskId: string, todolistId: string) =>
-    ({type: 'REMOVE-TASK', taskId, todolistId} as const)
-export const addTaskAC = (task: TaskType) =>
-    ({type: 'ADD-TASK', task} as const)
-export const updateTaskAC = (taskId: string, model: UpdateDomainTaskModelType, todolistId: string) =>
-    ({type: 'UPDATE-TASK', model, todolistId, taskId} as const)
-export const setTasksAC = (tasks: Array<TaskType>, todolistId: string) =>
-    ({type: 'SET-TASKS', tasks, todolistId} as const)
- */
 // thunks
 export const fetchTasksTC = (todolistId: string): AppThunk => (dispatch/* : Dispatch<ActionsType | SetAppStatusActionType> */) => {
     dispatch(setStatus({status: 'loading'}))

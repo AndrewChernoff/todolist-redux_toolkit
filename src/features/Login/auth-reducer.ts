@@ -5,6 +5,7 @@ import {handleServerAppError, handleServerNetworkError} from '../../utils/error-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { setStatus } from '../../app/app-reducer'
 import { AppThunk } from '../../app/store'
+import { clearData } from '../TodolistsList/todolists-reducer'
 
 type InitialStateType = {
     isLoggedIn: boolean
@@ -26,10 +27,10 @@ const slice = createSlice({
 })
 
 export const authReducer = slice.reducer
-export const {setIsLoggedIn} /* authActions */ = slice.actions
+export const {setIsLoggedIn} = slice.actions
 
 // thunks
-export const loginTC = (data: LoginParamsType): AppThunk => (dispatch/* : Dispatch<ActionsType | SetAppStatusActionType | SetAppErrorActionType> */) => {
+export const loginTC = (data: LoginParamsType) => (dispatch: Dispatch/* : Dispatch<ActionsType | SetAppStatusActionType | SetAppErrorActionType> */) => {
     dispatch(setStatus({status: 'loading'}))
     authAPI.login(data)
         .then(res => {
@@ -44,11 +45,12 @@ export const loginTC = (data: LoginParamsType): AppThunk => (dispatch/* : Dispat
             handleServerNetworkError(error, dispatch)
         })
 }
-export const logoutTC = (): AppThunk => (dispatch/* : Dispatch<ActionsType | SetAppStatusActionType | SetAppErrorActionType> */) => {
+export const logoutTC = () => (dispatch: Dispatch/* : Dispatch<ActionsType | SetAppStatusActionType | SetAppErrorActionType> */) => {
     dispatch(setStatus({status: 'loading'}))
     authAPI.logout()
         .then(res => {
             if (res.data.resultCode === 0) {
+                dispatch(clearData())
                 dispatch(setIsLoggedIn({isLoggedIn:false}))
                 dispatch(setStatus({status: 'succeeded'}))
             } else {
