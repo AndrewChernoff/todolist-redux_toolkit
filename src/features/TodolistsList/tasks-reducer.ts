@@ -51,7 +51,7 @@ const slice = createSlice({
             if (index !== -1) task.splice(index, 1)
         },
       addTask(state, action: PayloadAction<{task: TaskType}>) {
-        state[action.payload.task.todoListId].push(action.payload.task)
+        state[action.payload.task.todoListId].unshift(action.payload.task)
       },
       updateTask(state, action: PayloadAction<{taskId: string, model: UpdateDomainTaskModelType, todolistId: string}>) {
         const tasks = state[action.payload.todolistId]
@@ -112,7 +112,7 @@ const slice = createSlice({
   })
 
   export const tasksReducer = slice.reducer;
-  const {removeTask, addTask, updateTask, setTasks} = slice.actions
+  export const {removeTask, addTask, updateTask, setTasks} = slice.actions
 
 // thunks
 export const fetchTasksTC = (todolistId: string): AppThunk => (dispatch/* : Dispatch<ActionsType | SetAppStatusActionType> */) => {
@@ -148,8 +148,8 @@ export const addTaskTC = (title: string, todolistId: string): AppThunk => (dispa
             handleServerNetworkError(error, dispatch)
         })
 }
-export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string) =>
-    (dispatch: ThunkDispatch, getState: () => AppRootStateType) => {
+export const updateTaskTC = (taskId: string, domainModel: UpdateDomainTaskModelType, todolistId: string): AppThunk =>
+    (dispatch, getState: () => AppRootStateType) => {
         const state: any = getState()
         const task = state.tasks[todolistId].find((t: { id: string }) => t.id === taskId)
         if (!task) {
@@ -194,4 +194,3 @@ export type UpdateDomainTaskModelType = {
 export type TasksStateType = {
     [key: string]: Array<TaskType>
 }
-type ThunkDispatch = Dispatch<any/* ActionsType | SetAppStatusActionType | SetAppErrorActionType */>
