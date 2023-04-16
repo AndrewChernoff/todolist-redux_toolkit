@@ -4,7 +4,7 @@ import { EditableSpan } from '../../../components/EditableSpan/EditableSpan'
 import { Task } from './Task/Task'
 import { TaskStatuses, TaskType } from '../../../api/todolists-api'
 import { FilterValuesType, TodolistDomainType } from '../todolists-reducer'
-import { fetchTasksTC } from '../tasks-reducer'
+import { taskThunks } from '../tasks-reducer'
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { Button, IconButton } from '@mui/material'
 import { Delete } from '@mui/icons-material'
@@ -33,7 +33,7 @@ export const Todolist = React.memo(function ({demo = false, ...props}: PropsType
         if (demo) {
             return
         }
-        const thunk = fetchTasksTC(props.todolist.id)
+        const thunk = taskThunks.fetchTasks(props.todolist.id)
         todolists && dispatch(thunk)
     }, [])
 
