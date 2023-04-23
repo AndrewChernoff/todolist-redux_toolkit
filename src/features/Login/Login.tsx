@@ -1,11 +1,13 @@
 import React from 'react'
-import { useFormik } from 'formik'
+import { FormikHelpers, useFormik } from 'formik'
 import { useSelector } from 'react-redux'
-import { loginTC } from './auth-reducer'
+//import { loginTC } from './auth-reducer'
 import { AppRootStateType } from '../../app/store'
 import { Navigate } from 'react-router-dom'
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from '@mui/material'
+import { authThunk } from './auth-reducer'
+import { ResponseType } from '../../types/common.types'
 
 export const Login = () => {
     const dispatch = useAppDispatch()
@@ -13,7 +15,7 @@ export const Login = () => {
     const isLoggedIn = useSelector<AppRootStateType, boolean>(state => state.auth.isLoggedIn);
 
     const formik = useFormik({
-        validate: (values) => {
+        /* validate: (values) => {
             if (!values.email) {
                 return {
                     email: 'Email is required'
@@ -25,14 +27,21 @@ export const Login = () => {
                 }
             }
 
-        },
+        }, */
         initialValues: {
             email: '',
             password: '',
             rememberMe: false
         },
-        onSubmit: values => {
-            dispatch(loginTC(values));
+        onSubmit: (values, formikHelpers: FormikHelpers<{email: string, password: string, rememberMe: boolean}>) => {
+            dispatch(authThunk.login(values))
+            .unwrap()
+                .catch((res : ResponseType) => {
+                    console.log(res.data);
+                    if (res.messages) {
+                        res.fieldsErrors.length > 1 && [...res.fieldsErrors].forEach((el) => formikHelpers.setFieldError(el.field, el.error))
+                    }
+                })
         },
     })
 
@@ -65,14 +74,14 @@ export const Login = () => {
                             margin="normal"
                             {...formik.getFieldProps("email")}
                         />
-                        {formik.errors.email ? <div>{formik.errors.email}</div> : null}
+                        {formik.errors.email /* && formik.touched.password */ ? <div>{formik.errors.email}</div> : null}
                         <TextField
                             type="password"
                             label="Password"
                             margin="normal"
                             {...formik.getFieldProps("password")}
                         />
-                        {formik.errors.password ? <div>{formik.errors.password}</div> : null}
+                        {formik.errors.password /* && formik.touched.password */ ? <div>{formik.errors.password}</div> : null}
                         <FormControlLabel
                             label={'Remember me'}
                             control={<Checkbox
