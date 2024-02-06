@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { TaskType } from "features/TodolistsList/tasks/tasks.api"
 import { Task } from './Task/Task'
-import { TodolistDomainType, todolistsThunks } from 'features/TodolistsList/todolists/todolists.reducer'
+import { TodolistDomainType } from 'features/TodolistsList/todolists/todolists.reducer'
 import { TaskStatuses } from 'common/enums'
-import { useActions, useAppDispatch, useAppSelector } from 'common/hooks'
 
 type Props = {
     todolist: TodolistDomainType
