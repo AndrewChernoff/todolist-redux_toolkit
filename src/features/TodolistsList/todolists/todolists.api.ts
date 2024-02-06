@@ -1,6 +1,4 @@
 import { instance } from 'common/api/common.api';
-import { TaskPriorities, TaskStatuses } from 'common/enums/common.enums';
-import { UpdateDomainTaskModelType } from 'features/TodolistsList/tasks/tasks.reducer';
 import { ResponseType } from 'common/types';
 
 export const todolistsApi = {
@@ -15,7 +13,13 @@ export const todolistsApi = {
 	},
 	updateTodolist(arg: UpdateTodolistTitleArgType) {
 		return instance.put<ResponseType>(`todo-lists/${arg.id}`, {title: arg.title});
-	}
+	},
+	reorderTodolist(data: {todolistId: string, putAfterItemId: string}) {
+		return instance.put<ResponseType<any>>(`todo-lists/${data.todolistId}/reorder`, {putAfterItemId: data.putAfterItemId});
+	},
+	reorderTasks(data: {todolistId: string, taskId: string, putAfterItemId: string}) {
+		return instance.put<ResponseType<any>>(`todo-lists/${data.todolistId}/tasks/${data.taskId}/reorder`, {putAfterItemId: data.putAfterItemId});
+	},
 }
 
 // Types

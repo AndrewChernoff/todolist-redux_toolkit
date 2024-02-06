@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RequestStatusType } from 'app/app.reducer'
 import { todolistsApi, TodolistType, UpdateTodolistTitleArgType } from 'features/TodolistsList/todolists/todolists.api';
-import { createAppAsyncThunk, handleServerAppError, thunkTryCatch } from 'common/utils';
+import { createAppAsyncThunk } from 'common/utils';
 import { ResultCode } from 'common/enums';
 import { clearTasksAndTodolists } from 'common/actions';
 
@@ -23,7 +23,7 @@ const addTodolist = createAppAsyncThunk<{ todolist: TodolistType }, string>
 
 const removeTodolist = createAppAsyncThunk<{ id: string }, string>
 ('todo/removeTodolist', async (id, thunkAPI) => {
-	const {dispatch, rejectWithValue} = thunkAPI
+	const {rejectWithValue} = thunkAPI
 		const res = await todolistsApi.deleteTodolist(id)
 		if (res.data.resultCode === ResultCode.Success) {
 			return {id}
@@ -34,8 +34,30 @@ const removeTodolist = createAppAsyncThunk<{ id: string }, string>
 
 const changeTodolistTitle = createAppAsyncThunk<UpdateTodolistTitleArgType, UpdateTodolistTitleArgType>
 ('todo/changeTodolistTitle', async (arg, thunkAPI) => {
-	const {dispatch, rejectWithValue} = thunkAPI
+	const {rejectWithValue} = thunkAPI
 		const res = await todolistsApi.updateTodolist(arg)
+		if (res.data.resultCode === ResultCode.Success) {
+			return arg
+		} else {
+			return rejectWithValue({data: res.data, showGlobalError: false})
+		}
+})
+
+const reorderTodolist = createAppAsyncThunk<{todolistId: string, putAfterItemId: string}, any>
+('todo/reorderTodolist', async (arg, thunkAPI) => {
+	const {rejectWithValue} = thunkAPI
+		const res = await todolistsApi.reorderTodolist(arg)
+		if (res.data.resultCode === ResultCode.Success) {
+			return arg
+		} else {
+			return rejectWithValue({data: res.data, showGlobalError: false})
+		}
+}
+)
+const reorderTasks = createAppAsyncThunk<{todolistId: string, taskId: string, putAfterItemId: string}, any>
+('todo/reorderTodolist', async (arg, thunkAPI) => {
+	const {rejectWithValue} = thunkAPI
+		const res = await todolistsApi.reorderTasks(arg)
 		if (res.data.resultCode === ResultCode.Success) {
 			return arg
 		} else {
@@ -88,12 +110,25 @@ const slice = createSlice({
 			.addCase(clearTasksAndTodolists, () => {
 				return []
 			})
+			.addCase(reorderTodolist.fulfilled, (state, action) => {
+				const fromIndex  = state.findIndex(el => el.id === action.payload.todolistId)
+				
+				const toIndex = state.findIndex(el => el.id === action.payload.putAfterItemId)
+
+				const element = state.splice(fromIndex, 1)[0]
+			
+				state.splice(toIndex, 0, element)
+			})
+			/* .addCase(reorderTasks.fulfilled, (state, action) => {
+				return state
+				
+			}) */
 	}
 })
 
 export const todolistsReducer = slice.reducer
 export const todolistsActions = slice.actions
-export const todolistsThunks = {fetchTodolists, addTodolist, removeTodolist, changeTodolistTitle}
+export const todolistsThunks = {fetchTodolists, addTodolist, removeTodolist, changeTodolistTitle, reorderTodolist, reorderTasks}
 
 
 // types

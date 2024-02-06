@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { TaskType } from "features/TodolistsList/tasks/tasks.api"
 import { Task } from './Task/Task'
-import { TodolistDomainType } from 'features/TodolistsList/todolists/todolists.reducer'
+import { TodolistDomainType, todolistsThunks } from 'features/TodolistsList/todolists/todolists.reducer'
 import { TaskStatuses } from 'common/enums'
+import { useActions, useAppDispatch, useAppSelector } from 'common/hooks'
 
 type Props = {
     todolist: TodolistDomainType
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export const Tasks = ({todolist, tasks} : Props) => {
+
     let tasksForTodolist = tasks
 
 	if (todolist.filter === 'active') {
@@ -18,10 +20,10 @@ export const Tasks = ({todolist, tasks} : Props) => {
 	if (todolist.filter === 'completed') {
 		tasksForTodolist = tasks.filter(t => t.status === TaskStatuses.Completed)
 	}
+
     return <div>
     {
-        tasksForTodolist.map(t => <Task key={t.id} task={t} todolistId={todolist.id}
-        />)
+        tasksForTodolist.map(t => <Task key={t.id} task={t} todolistId={todolist.id} />)
     }
 </div>
 }

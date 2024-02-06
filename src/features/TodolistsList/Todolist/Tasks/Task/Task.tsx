@@ -27,7 +27,7 @@ export const Task = memo(({task, todolistId}: TaskPropsType) => {
 		updateTask({taskId: task.id, domainModel: {title: newValue}, todolistId: todolistId})
 	}, [task.id, todolistId]);
 
-	return <div key={task.id} className={task.status === TaskStatuses.Completed ? 'is-done' : ''}>
+	return <div key={task.id} draggable={true} className={task.status === TaskStatuses.Completed ? 'is-done' : ''}>
 		<Checkbox
 			checked={task.status === TaskStatuses.Completed}
 			color="primary"

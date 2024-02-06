@@ -1,10 +1,8 @@
 import React, { memo, useCallback, useEffect } from 'react'
 import { Delete } from '@mui/icons-material'
-import { Button, IconButton } from '@mui/material'
-import { Task } from './Tasks/Task/Task'
-import {  TodolistDomainType, todolistsActions, todolistsThunks } from 'features/TodolistsList/todolists/todolists.reducer'
+import { IconButton } from '@mui/material'
+import {  TodolistDomainType, todolistsThunks } from 'features/TodolistsList/todolists/todolists.reducer'
 import { tasksThunks } from 'features/TodolistsList/tasks/tasks.reducer';
-import { TaskStatuses } from 'common/enums';
 import { useActions } from 'common/hooks';
 import { AddItemForm, EditableSpan } from 'common/components'
 import { TaskType } from '../tasks/tasks.api'
@@ -16,9 +14,18 @@ type PropsType = {
 	tasks: TaskType[]
 	removeTodolist: (id: string) => void
 	changeTodolistTitle: (id: string, newTitle: string) => void
+	onDragOver : (e:React.DragEvent<HTMLDivElement>) => void
+	onDragLeave : (e:React.DragEvent<HTMLDivElement>) => void
+	onDragStart : (e:React.DragEvent<HTMLDivElement>, id: string) => void
+	onDragEnd : (e:React.DragEvent<HTMLDivElement>) => void
+	onDrop : (e: React.DragEvent<HTMLDivElement>, id: string) => void
 }
 
-export const Todolist = memo(function ({todolist, tasks}: PropsType) {
+export const Todolist = memo(function ({todolist, tasks, onDragOver,
+	onDragLeave,
+	onDragStart,
+	onDragEnd,
+	onDrop}: PropsType) {
 
 	const {
 		removeTodolist,
@@ -45,7 +52,14 @@ export const Todolist = memo(function ({todolist, tasks}: PropsType) {
 	}, [todolist.id, changeTodolistTitle])
 
 
-	return <div>
+	return <div draggable={true}
+	style={{cursor: 'grab'}}
+	onDragOver={onDragOver}
+		onDragLeave={onDragLeave}
+		onDragStart={(e) => onDragStart(e,todolist.id)}
+		onDragEnd={onDragEnd}
+		onDrop={(e) => onDrop(e,todolist.id)}
+	>
 		<h3><EditableSpan value={todolist.title} onChange={changeTodolistTitleCallback}/>
 			<IconButton onClick={removeTodolistCallback} disabled={todolist.entityStatus === 'loading'}>
 				<Delete/>
