@@ -17,9 +17,9 @@ export const todolistsApi = {
 	reorderTodolist(data: {todolistId: string, putAfterItemId: string}) {
 		return instance.put<ResponseType<any>>(`todo-lists/${data.todolistId}/reorder`, {putAfterItemId: data.putAfterItemId});
 	},
-	reorderTasks(data: {todolistId: string, taskId: string, putAfterItemId: string}) {
+	/* reorderTasks(data: {todolistId: string, taskId: string, putAfterItemId: string}) {
 		return instance.put<ResponseType<any>>(`todo-lists/${data.todolistId}/tasks/${data.taskId}/reorder`, {putAfterItemId: data.putAfterItemId});
-	},
+	}, */
 }
 
 // Types

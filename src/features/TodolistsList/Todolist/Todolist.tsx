@@ -14,18 +14,9 @@ type PropsType = {
 	tasks: TaskType[]
 	removeTodolist: (id: string) => void
 	changeTodolistTitle: (id: string, newTitle: string) => void
-	onDragOver : (e:React.DragEvent<HTMLDivElement>) => void
-	onDragLeave : (e:React.DragEvent<HTMLDivElement>) => void
-	onDragStart : (e:React.DragEvent<HTMLDivElement>, id: string) => void
-	onDragEnd : (e:React.DragEvent<HTMLDivElement>) => void
-	onDrop : (e: React.DragEvent<HTMLDivElement>, id: string) => void
 }
 
-export const Todolist = memo(function ({todolist, tasks, onDragOver,
-	onDragLeave,
-	onDragStart,
-	onDragEnd,
-	onDrop}: PropsType) {
+export const Todolist = memo(function ({todolist, tasks}: PropsType) {
 
 	const {
 		removeTodolist,
@@ -52,14 +43,7 @@ export const Todolist = memo(function ({todolist, tasks, onDragOver,
 	}, [todolist.id, changeTodolistTitle])
 
 
-	return <div draggable={true}
-	style={{cursor: 'grab'}}
-	onDragOver={onDragOver}
-		onDragLeave={onDragLeave}
-		onDragStart={(e) => onDragStart(e,todolist.id)}
-		onDragEnd={onDragEnd}
-		onDrop={(e) => onDrop(e,todolist.id)}
-	>
+	return <div draggable={true} style={{cursor: 'grab'}}>
 		<h3><EditableSpan value={todolist.title} onChange={changeTodolistTitleCallback}/>
 			<IconButton onClick={removeTodolistCallback} disabled={todolist.entityStatus === 'loading'}>
 				<Delete/>

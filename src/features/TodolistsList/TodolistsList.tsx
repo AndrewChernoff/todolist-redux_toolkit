@@ -9,12 +9,12 @@ import { useActions } from 'common/hooks';
 import { selectIsLoggedIn } from 'features/auth/auth.selectors';
 import { selectTasks } from 'features/TodolistsList/tasks/tasks.selectors';
 import { selectTodolists } from 'features/TodolistsList/todolists/todolists.selectors';
+import { DragDropContext, Draggable, DropResult, Droppable } from 'react-beautiful-dnd'
 
 export const TodolistsList = () => {
 	const todolists = useSelector(selectTodolists)
 	const tasks = useSelector(selectTasks)
 	const isLoggedIn = useSelector(selectIsLoggedIn)
-	const [draggedId, setDraggedId] = useState<string| null>() //id of dragged todolist
 
 	const {
 		removeTodolist: removeTodolistThunk,
@@ -48,62 +48,75 @@ export const TodolistsList = () => {
 		return <Navigate to={'/login'}/>
 	}
 
-	function dragOverHandler(e: any): void {
-		e.preventDefault()
-		if(e.target.className === 'item') {
-		  e.target.style.boxShadow = '0 2px 3px gray'
-		}
-	  }
-	
-	  function dragLeaveHandler(e: any): void {
-		e.preventDefault()
-		e.target.style.boxShadow = 'none'
-	  }
-	
-	  function dragStartHandler(e: React.DragEvent<HTMLDivElement>, id: string): void {	
-		setDraggedId(id)
-	  }
-		
-	
-	  function dragEndHandler(e: any): void {
-		e.preventDefault()
-		e.target.style.boxShadow = 'none'
-		
-	  }
-	
-	  function dropHandler(e: React.DragEvent<HTMLDivElement>, id: string): void {
-		if(draggedId && id !== draggedId) {
-			reorderTodolist({todolistId: draggedId, putAfterItemId: id})
-		}
+	  const onDragEndHanler = (result: DropResult) => {
+    
+		const { source, destination, type } = result;
 
-		setDraggedId(null)
-	  };
+		if (!destination) return;
+
+		console.log(result);
+		
+	
+		if (
+		  source.droppableId === destination.droppableId &&
+		  source.index === destination.index
+		)
+		  return;
+	
+		if (type === "TODOLISTS") {
+		  console.log('yo');
+		  const putAfterItemId = todolists.find((_,i) => i === destination.index)?.id
+		  //console.log(todoListId);
+		  reorderTodolist({todolistId: result.draggableId, putAfterItemId: putAfterItemId})
+		  
+		}
+	
+	  }
 
 	return <>
 		<Grid container style={{padding: '20px'}}>
 			<AddItemForm addItem={addTodolistCallback}/>
 		</Grid>
-		<Grid container spacing={3}>
-			{todolists.map(tl => {
+		<DragDropContext onDragEnd={onDragEndHanler}>
+        <Droppable
+          droppableId="todolistslist"
+          type="TODOLISTS"
+        >
+          {(provided) => (
+
+		<Grid container spacing={3} ref={provided.innerRef} {...provided.droppableProps}>
+			{todolists.map((tl, i) => {
 					let allTodolistTasks = tasks[tl.id]
 
-					return <Grid item key={tl.id}>
+					return <Draggable key={tl.id} draggableId={`${tl.id}`} index={i}>
+					{(draggableProvided, draggableSnapshot) => ( 
+					
+					<Grid item key={tl.id} 
+					ref={draggableProvided.innerRef}
+                    {...draggableProvided.draggableProps}
+                    {...draggableProvided.dragHandleProps}>
 						<Paper style={{padding: '10px'}}>
 							<Todolist
 								todolist={tl}
 								tasks={allTodolistTasks}
 								removeTodolist={removeTodolist}
 								changeTodolistTitle={changeTodolistTitle}
-								onDragOver={dragOverHandler}
+								/* onDragOver={dragOverHandler}
 								onDragLeave={dragLeaveHandler}
 								onDragStart={dragStartHandler}
 								onDragEnd={dragEndHandler}
-								onDrop={dropHandler}
+								onDrop={dropHandler} */
 								key={tl.id}
 							/>
 						</Paper>
 					</Grid>
+					)}
+					</Draggable> 
 				})}
 		</Grid>
+		  )}
+		        </Droppable>
+				</DragDropContext>
+		  
 	</>
 }
