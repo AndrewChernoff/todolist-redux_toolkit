@@ -43,7 +43,7 @@ export const Todolist = memo(function ({todolist, tasks}: PropsType) {
 	}, [todolist.id, changeTodolistTitle])
 
 
-	return <div draggable={true} style={{cursor: 'grab'}}>
+	return <div style={{cursor: 'grab'}}>
 		<h3><EditableSpan value={todolist.title} onChange={changeTodolistTitleCallback}/>
 			<IconButton onClick={removeTodolistCallback} disabled={todolist.entityStatus === 'loading'}>
 				<Delete/>
